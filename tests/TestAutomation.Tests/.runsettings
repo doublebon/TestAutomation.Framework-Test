@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <NUnit>
+    <!-- Количество параллельных worker'ов -->
+    <NumberOfTestWorkers>4</NumberOfTestWorkers>
+  </NUnit>
+
+  <RunConfiguration>
+    <MaxCpuCount>0</MaxCpuCount>
+    <ResultsDirectory>.\TestResults</ResultsDirectory>
+  </RunConfiguration>
+
+  <LoggerRunSettings>
+    <Loggers>
+      <Logger friendlyName="console" enabled="True" />
+      <Logger friendlyName="trx" enabled="True" />
+    </Loggers>
+  </LoggerRunSettings>
+</RunSettings>
