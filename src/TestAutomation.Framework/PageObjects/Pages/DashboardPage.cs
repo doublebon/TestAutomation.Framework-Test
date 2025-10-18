@@ -5,61 +5,60 @@ using TestAutomation.Framework.PageObjects.Components;
 
 namespace TestAutomation.Framework.PageObjects.Pages;
 
-public class DashboardPage : BasePage
+/// <summary>
+/// DashboardPage с generic родителем
+/// TParent - ЛЮБАЯ страница (LoginPage, SettingsPage, UserManagementPage и т.д.)
+/// </summary>
+public class DashboardPage<TParent> : BasePage, IBaseFragment<TParent, DashboardPage<TParent>>
+    where TParent : BasePage
 {
     private ILocator PageHeading => Page.Locator("h1, h2").First;
     private ILocator WelcomeMessage => Page.Locator("text=/welcome/i").First;
     private ILocator UserManagementLink => Page.Locator("a:has-text('Users'), a:has-text('User Management')");
     private ILocator SettingsLink => Page.Locator("a:has-text('Settings')");
     private ILocator ReportsButton => Page.Locator("button:has-text('Reports')");
-
-    // Header компонент
-    private HeaderComponent? _header;
-    public HeaderComponent Header => _header ??= new HeaderComponent(Page);
-
-    public DashboardPage(IPage page, IBrowserContext context) : base(page, context)
-    {
-    }
-
-    public async Task<DashboardPage> WaitForPageLoadAsync()
-    {
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
-        return this;
-    }
-
-    public async Task<DashboardPage> ClickReportsAsync()
-    {
-        await ReportsButton.ClickAsync();
-        return this;
-    }
-
-    /// <summary>
-    /// Навигация на страницу User Management
-    /// </summary>
-    public async Task<UserManagementPage> GoToUserManagementAsync()
-    {
-        await UserManagementLink.ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        return new UserManagementPage(Page, Context);
-    }
-
-    /// <summary>
-    /// Навигация на страницу Settings
-    /// </summary>
-    public async Task<SettingsPage> GoToSettingsAsync()
-    {
-        await SettingsLink.ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        return new SettingsPage(Page, Context);
-    }
+    
+    public TParent? PreviousFragment { get; }
     
     /// <summary>
-    /// Навигация на страницу Settings
+    /// Конструктор БЕЗ родителя (первая страница или root)
     /// </summary>
-    public async Task<SettingsPage> GoToOtherPageAsync()
+    public DashboardPage(IPage page, IBrowserContext context) 
+        : base(page, context)
     {
-        await NavigateAsync("http://www.uitestingplayground.com/dynamicid");
-        return new SettingsPage(Page, Context);
+        PreviousFragment = null;
+    }
+
+    /// <summary>
+    /// Конструктор С родителем
+    /// TParent может быть LoginPage, SettingsPage, UserManagementPage - что угодно!
+    /// </summary>
+    public DashboardPage(IPage page, IBrowserContext context, TParent previousFragment) 
+        : base(page, context)
+    {
+        PreviousFragment = previousFragment;
+    }
+    
+    // /// <summary>
+    // /// Клик по кнопке логина и переход на DashboardPage
+    // /// </summary>
+    // public async Task<LoginPage<DashboardPage<TParent>>> GoToLoginPageAsync()
+    // {
+    //     return await Task.FromResult(new LoginPage<DashboardPage<TParent>>(Page, Context, this));
+    // }
+    
+    /// <summary>
+    /// Клик по кнопке логина и переход на DashboardPage
+    /// </summary>
+    public async Task<SettingsPage<DashboardPage<TParent>>> GoToSettings()
+    {
+        return await Task.FromResult(new SettingsPage<DashboardPage<TParent>>(Page, Context, this));
+    }
+    
+    public Task<DashboardPage<TParent>> HelloDashBoard()
+    {
+        Console.WriteLine("Hello DashBoard");
+        return Task.FromResult(this);
     }
 
     public async Task<string> GetWelcomeMessageAsync()
@@ -71,4 +70,6 @@ public class DashboardPage : BasePage
     {
         await Expect(PageHeading).ToBeVisibleAsync();
     }
+    
+    
 }
