@@ -15,8 +15,7 @@ public class LoginPage<TParent> : BasePage, IBaseFragment<TParent, LoginPage<TPa
     private ILocator UsernameInput => Page.Locator("//*[@name=\"UserName\"]");
     private ILocator PasswordInput => Page.Locator("//*[@name=\"Password\"]");
     private ILocator LoginButton => Page.Locator("//*[@id=\"login\"]");
-    private ILocator ErrorMessage => Page.Locator(".error-message, .alert-danger, [role='alert']");
-
+    
     public TParent? PreviousFragment { get; }
 
     /// <summary>
@@ -76,40 +75,21 @@ public class LoginPage<TParent> : BasePage, IBaseFragment<TParent, LoginPage<TPa
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         return new DashboardPage<TParent>(Page, Context);
     }
-
-    // Assertions
-    public async Task AssertErrorMessageVisibleAsync()
+    
+    /// <summary>
+    /// Клик по кнопке логина и переход на DashboardPage
+    /// </summary>
+    public Task<DashboardPage<LoginPage<TParent>>> GoToDashboard()
     {
-        await Expect(ErrorMessage).ToBeVisibleAsync();
-    }
-
-    public async Task AssertErrorMessageTextAsync(string expectedText)
-    {
-        await Expect(ErrorMessage).ToHaveTextAsync(expectedText, new LocatorAssertionsToHaveTextOptions
-        {
-            Timeout = 5000
-        });
-    }
-
-    public async Task AssertLoginButtonDisabledAsync()
-    {
-        await Expect(LoginButton).ToBeDisabledAsync();
+        return Task.FromResult(new DashboardPage<LoginPage<TParent>>(Page, Context, this));
     }
     
     /// <summary>
     /// Клик по кнопке логина и переход на DashboardPage
     /// </summary>
-    public async Task<DashboardPage<LoginPage<TParent>>> GoToDashboard()
+    public Task<SettingsPage<LoginPage<TParent>>> GoToSettings()
     {
-        return await Task.FromResult(new DashboardPage<LoginPage<TParent>>(Page, Context, this));
-    }
-    
-    /// <summary>
-    /// Клик по кнопке логина и переход на DashboardPage
-    /// </summary>
-    public async Task<SettingsPage<LoginPage<TParent>>> GoToSettings()
-    {
-        return await Task.FromResult(new SettingsPage<LoginPage<TParent>>(Page, Context, this));
+        return Task.FromResult(new SettingsPage<LoginPage<TParent>>(Page, Context, this));
     }
 
     public async Task<LoginPage<TParent>> HelloLogin()
@@ -123,10 +103,4 @@ public class LoginPage<TParent> : BasePage, IBaseFragment<TParent, LoginPage<TPa
 /// Non-generic alias для простоты
 /// LoginPage = LoginPage<BasePage> (без родителя)
 /// </summary>
-public class LoginPage : LoginPage<BasePage>
-{
-    public LoginPage(IPage page, IBrowserContext context) 
-        : base(page, context)
-    {
-    }
-}
+public class LoginPage(IPage page, IBrowserContext context) : LoginPage<BasePage>(page, context);

@@ -12,11 +12,6 @@ namespace TestAutomation.Framework.PageObjects.Pages;
 public class DashboardPage<TParent> : BasePage, IBaseFragment<TParent, DashboardPage<TParent>>
     where TParent : BasePage
 {
-    private ILocator PageHeading => Page.Locator("h1, h2").First;
-    private ILocator WelcomeMessage => Page.Locator("text=/welcome/i").First;
-    private ILocator UserManagementLink => Page.Locator("a:has-text('Users'), a:has-text('User Management')");
-    private ILocator SettingsLink => Page.Locator("a:has-text('Settings')");
-    private ILocator ReportsButton => Page.Locator("button:has-text('Reports')");
     
     public TParent? PreviousFragment { get; }
     
@@ -39,20 +34,12 @@ public class DashboardPage<TParent> : BasePage, IBaseFragment<TParent, Dashboard
         PreviousFragment = previousFragment;
     }
     
-    // /// <summary>
-    // /// Клик по кнопке логина и переход на DashboardPage
-    // /// </summary>
-    // public async Task<LoginPage<DashboardPage<TParent>>> GoToLoginPageAsync()
-    // {
-    //     return await Task.FromResult(new LoginPage<DashboardPage<TParent>>(Page, Context, this));
-    // }
-    
     /// <summary>
     /// Клик по кнопке логина и переход на DashboardPage
     /// </summary>
-    public async Task<SettingsPage<DashboardPage<TParent>>> GoToSettings()
+    public Task<SettingsPage<DashboardPage<TParent>>> GoToSettings()
     {
-        return await Task.FromResult(new SettingsPage<DashboardPage<TParent>>(Page, Context, this));
+        return Task.FromResult(new SettingsPage<DashboardPage<TParent>>(Page, Context, this));
     }
     
     public Task<DashboardPage<TParent>> HelloDashBoard()
@@ -60,16 +47,4 @@ public class DashboardPage<TParent> : BasePage, IBaseFragment<TParent, Dashboard
         Console.WriteLine("Hello DashBoard");
         return Task.FromResult(this);
     }
-
-    public async Task<string> GetWelcomeMessageAsync()
-    {
-        return await WelcomeMessage.TextContentAsync() ?? string.Empty;
-    }
-
-    public async Task AssertPageLoadedAsync()
-    {
-        await Expect(PageHeading).ToBeVisibleAsync();
-    }
-    
-    
 }

@@ -8,12 +8,13 @@ namespace TestAutomation.Framework.Core;
 /// </summary>
 public class PlaywrightFixture : IDisposable
 {
+    private bool _disposed;
     private IPlaywright? _playwright;
     private IBrowser? _browser;
 
     // Каждый тест получает свой BrowserContext для полной изоляции
-    private readonly List<IBrowserContext> _contexts = new();
-    private readonly List<IPage> _pages = new();
+    private readonly List<IBrowserContext> _contexts = [];
+    private readonly List<IPage> _pages = [];
 
     public async Task InitializeAsync()
     {
@@ -79,13 +80,26 @@ public class PlaywrightFixture : IDisposable
 
     public void Dispose()
     {
-        foreach (var page in _pages)
-            page.CloseAsync().GetAwaiter().GetResult();
+        Dispose(true);
+        // Рекомендуется вызывать SuppressFinalize — именно это требует CA1816
+        GC.SuppressFinalize(this);
+    }
+    
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed) return;
+        if (disposing)
+        {
+            foreach (var page in _pages)
+                page.CloseAsync().GetAwaiter().GetResult();
 
-        foreach (var context in _contexts)
-            context.CloseAsync().GetAwaiter().GetResult();
+            foreach (var context in _contexts)
+                context.CloseAsync().GetAwaiter().GetResult();
 
-        _browser?.CloseAsync().GetAwaiter().GetResult();
-        _playwright?.Dispose();
+            _browser?.CloseAsync().GetAwaiter().GetResult();
+            _playwright?.Dispose();
+        }
+
+        _disposed = true;
     }
 }

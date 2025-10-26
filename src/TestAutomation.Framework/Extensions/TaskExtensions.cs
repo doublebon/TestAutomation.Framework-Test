@@ -17,4 +17,13 @@ public static class TaskExtensions
         var result = await task;
         return await next(result);
     }
+    
+    public static async Task<TResult> Then<T, TResult>(
+        this Task<T> task, 
+        Func<T, ValueTask<TResult>> next)
+    {
+        var result = await task;
+        return await next(result);
+    }
+    
 }

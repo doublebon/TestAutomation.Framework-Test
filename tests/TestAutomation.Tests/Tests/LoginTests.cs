@@ -8,9 +8,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace TestAutomation.Tests.Tests;
 
-/// <summary>
-/// Тесты Login функциональности с примерами использования fluent API
-/// </summary>
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
 public class LoginTests : BaseTest
