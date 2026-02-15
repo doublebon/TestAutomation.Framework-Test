@@ -33,7 +33,7 @@ TestAutomation.sln
 dotnet restore
 
 # Установить браузеры Playwright (важно!)
-pwsh tests/TestAutomation.Tests/bin/Debug/net8.0/playwright.ps1 install
+pwsh tests/TestAutomation.Tests/bin/Debug/net8.0/playwright.ps1 install chromium
 ```
 
 Или на Linux/macOS:
