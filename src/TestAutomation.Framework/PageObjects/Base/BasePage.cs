@@ -53,9 +53,8 @@ public abstract class BasePage
         return Task.FromResult(new LoginPage(Page, Context));
     }
 
-    public async Task<string> ReturnHelloAsync()
+    public string ReturnHelloAsync()
     {
-        await Task.Delay(3000); // ✅ поток свободен во время ожидания
         return "ASDASDSAD";
     }
 }

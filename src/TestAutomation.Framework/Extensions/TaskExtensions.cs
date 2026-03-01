@@ -10,29 +10,22 @@ public static class TaskExtensions
     /// Then для chaining с трансформацией типа (LoginPage -> DashboardPage -> UserManagementPage)
     /// Это ОСНОВНОЙ метод для навигации между страницами
     /// </summary>
+    // Async методы — навигация, действия Playwright
     public static async Task<TResult> Then<T, TResult>(
-        this Task<T> task, 
+        this Task<T> task,
         Func<T, Task<TResult>> next)
     {
         var result = await task;
         return await next(result);
     }
-    
-    public static async Task<TResult> Then<T, TResult>(
-        this Task<T> task, 
-        Func<T, ValueTask<TResult>> next)
-    {
-        var result = await task;
-        return await next(result);
-    }
 
-    // Task -> sync value  ← новый
+    // Sync методы — чтение свойств, проверки, string, List и т.д.
     public static async Task<TResult> Then<T, TResult>(
         this Task<T> task,
         Func<T, TResult> next)
     {
         var result = await task;
-        return next(result); // синхронный вызов, оборачиваем в Task автоматически
+        return next(result);
     }
 
 }

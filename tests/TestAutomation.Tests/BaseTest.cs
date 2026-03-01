@@ -1,4 +1,3 @@
-
 using Microsoft.Playwright;
 using NUnit.Framework;
 using TestAutomation.Framework.Core;
@@ -56,6 +55,12 @@ public class GlobalPlaywrightFixture
                 "--enable-automation"
             }
         });
+
+
+        foreach (var dir in new[] { "testResults/videos", "testResults/traces", "testResults/screenshots" })
+        {
+            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), dir));
+        }
     }
 
     [OneTimeTearDown]
@@ -76,23 +81,32 @@ public class GlobalPlaywrightFixture
 [Parallelizable(ParallelScope.All)]
 public abstract class BaseTest
 {
-    protected IBrowserContext Context = null!;
-    protected IPage Page = null!;
+    protected IBrowserContext Context { get; private set; } = null!;
+    protected IPage Page { get; private set; } = null!;
 
     [SetUp]
     public async Task Setup()
     {
-        // Создаем директорию для видео
-        var videoDir = Path.Combine(Directory.GetCurrentDirectory(), "testResults", "videos");
-        Directory.CreateDirectory(videoDir);
+        //// Создаем директорию для видео
+        //var videoDir = Path.Combine(Directory.GetCurrentDirectory(), "testResults", "videos");
+        //Directory.CreateDirectory(videoDir);
 
-        // Конфигурируем контекст с записью видео
-        var contextOptions = new BrowserNewContextOptions
+        //// Конфигурируем контекст с записью видео
+        //var contextOptions = new BrowserNewContextOptions
+        //{
+        //    RecordVideoDir = TestConfiguration.RecordVideo ? videoDir : null
+        //};
+        //Context = await GlobalPlaywrightFixture.Browser.NewContextAsync(contextOptions);
+
+        Context = await GlobalPlaywrightFixture.Browser.NewContextAsync(new BrowserNewContextOptions
         {
-            RecordVideoDir = TestConfiguration.RecordVideo ? videoDir : null
-        };
+            ViewportSize = new ViewportSize
+            {
+                Width = TestConfiguration.ViewportWidth,
+                Height = TestConfiguration.ViewportHeight
+            }
+        });
 
-        Context = await GlobalPlaywrightFixture.Browser.NewContextAsync(contextOptions);
         await Context.Tracing.StartAsync(new TracingStartOptions
         {
             Screenshots = true,
@@ -108,24 +122,35 @@ public abstract class BaseTest
     [TearDown]
     public async Task TearDown()
     {
-        // Проверяем, упал ли тест
-        if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
-        {
-            var tracePath = Path.Combine(Directory.GetCurrentDirectory(), "testResults", "traces", $"{TestContext.CurrentContext.Test.Name}.zip");
+        var testName = TestContext.CurrentContext.Test.Name;
+        var isFailed = TestContext.CurrentContext.Result.Outcome.Status ==
+                        NUnit.Framework.Interfaces.TestStatus.Failed;
 
-            // Сохраняем трейс только если тест упал!
-            await Context.Tracing.StopAsync(new TracingStopOptions
+        var outputDir = Directory.GetCurrentDirectory();
+        var tracePath = Path.Combine(outputDir, "testResults/traces", $"{testName}.zip");
+        var screenshotPath = Path.Combine(outputDir, "testResults/screenshots", $"{testName}.png");
+
+
+        // Сохраняем трейс ТОЛЬКО если тест упал
+        await Context.Tracing.StopAsync(new TracingStopOptions
+        {
+            Path = isFailed ? tracePath : null
+        });
+
+
+        if (isFailed)
+        {
+            await Page.ScreenshotAsync(new PageScreenshotOptions
             {
-                Path = tracePath
+                Path = screenshotPath,
+                FullPage = true
             });
 
+            TestContext.AddTestAttachment(screenshotPath, "Screenshot");
             TestContext.AddTestAttachment(tracePath, "Playwright Trace");
         }
-        else
-        {
-            await Context.Tracing.StopAsync(new TracingStopOptions { Path = null }); // Не сохраняем для успешных
-        }
 
+        await Page.CloseAsync();
         await Context.CloseAsync();
     }
 }

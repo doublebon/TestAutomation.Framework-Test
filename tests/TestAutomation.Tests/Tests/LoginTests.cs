@@ -21,8 +21,12 @@ public class LoginTests : BaseTest
         var s = await new LoginPage(Page, Context)
             .ClickLoginAsync()
             .Then(page => page.GoToLoginPageAsync())
-            .Then(page => page.ReturnHelloAsync())
-            .Then(page => page.ToLower());
+            .Then(async page => {
+                await page.EnterPasswordAsync("1111");
+                await page.EnterUsernameAsync("111");
+                return page;
+            })
+            .Then(page => page.ReturnHelloAsync());
         Console.WriteLine(s);
     }
 
