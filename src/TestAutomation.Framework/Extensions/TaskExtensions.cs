@@ -25,5 +25,14 @@ public static class TaskExtensions
         var result = await task;
         return await next(result);
     }
-    
+
+    // Task -> sync value  ← новый
+    public static async Task<TResult> Then<T, TResult>(
+        this Task<T> task,
+        Func<T, TResult> next)
+    {
+        var result = await task;
+        return next(result); // синхронный вызов, оборачиваем в Task автоматически
+    }
+
 }

@@ -6,26 +6,14 @@ namespace TestAutomation.Framework.PageObjects.Pages;
 /// <summary>
 /// SettingsPage с generic родителем
 /// </summary>
-public class SettingsPage<TParent> : BasePage, IBaseFragment<TParent, SettingsPage<TParent>>
-    where TParent : BasePage
+public class SettingsPage<TParent>(IPage page, IBrowserContext context, TParent? previousFragment = null)
+    : BasePage(page, context), IBaseFragment<TParent, SettingsPage<TParent>> where TParent : BasePage
 {
-    private ILocator SaveButton => Page.Locator("button:has-text('Save')");
-    private ILocator DashboardLink => Page.Locator("a:has-text('Dashboard')");
+    private readonly ILocator SaveButton = page.Locator("button:has-text('Save')");
+    private readonly ILocator DashboardLink = page.Locator("a:has-text('Dashboard')");
 
-    public TParent? PreviousFragment { get; }
+    public TParent? PreviousFragment { get; } = previousFragment;
 
-    public SettingsPage(IPage page, IBrowserContext context) 
-        : base(page, context)
-    {
-        PreviousFragment = null;
-    }
-
-    public SettingsPage(IPage page, IBrowserContext context, TParent previousFragment) 
-        : base(page, context)
-    {
-        PreviousFragment = previousFragment;
-    }
-    
     /// <summary>
     /// Клик по кнопке логина и переход на DashboardPage
     /// </summary>
@@ -37,7 +25,7 @@ public class SettingsPage<TParent> : BasePage, IBaseFragment<TParent, SettingsPa
     public Task<SettingsPage<TParent>> HelloSettings()
     {
         Console.WriteLine("Hello Settings");
-        return Task.FromResult(this);;
+        return Task.FromResult(this);
     }
     
 }
