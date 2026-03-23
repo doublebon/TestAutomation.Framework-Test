@@ -13,7 +13,7 @@ namespace TestAutomation.Tests.Tests;
 [Parallelizable(ParallelScope.All)]
 public class LoginTests : BaseTest
 {
-    
+
     [Test]
     [Category("Login")]
     public async Task MyTest_Login22222()
@@ -33,5 +33,13 @@ public class LoginTests : BaseTest
             .Then(page => page.GoToSettings())
             .Then(page => page.Hello());
         Console.WriteLine(s);
+    }
+
+    [Test]
+    [Category("Login")]
+    public async Task MyTest_Login3333()
+    {
+        await new SettingsPage(Page, Context).Open()
+            .Then(page => page.Hello());
     }
 }

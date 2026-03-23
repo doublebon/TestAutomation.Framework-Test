@@ -18,7 +18,7 @@ public class SettingsPage<TParent>(IPage page, IBrowserContext context, TParent?
 
     public async Task<SettingsPage<TParent>> Open()
     {
-        var pageLogin = await new LoginPage(Page, Context).Open();
+        await (await new LoginPage(Page, Context).Open()).GoToSettings();
         // Здесь можно добавить логику для открытия страницы, если это необходимо
         return this;
     }
@@ -30,3 +30,9 @@ public class SettingsPage<TParent>(IPage page, IBrowserContext context, TParent?
     }
 
 }
+
+/// <summary>
+/// Non-generic alias для простоты
+/// SettingsPage = SettingsPage<BasePage> (без родителя)
+/// </summary>
+public class SettingsPage(IPage page, IBrowserContext context) : SettingsPage<BasePage<object, object>>(page, context);
