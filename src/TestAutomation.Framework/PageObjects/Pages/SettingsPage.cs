@@ -7,25 +7,26 @@ namespace TestAutomation.Framework.PageObjects.Pages;
 /// SettingsPage с generic родителем
 /// </summary>
 public class SettingsPage<TParent>(IPage page, IBrowserContext context, TParent? previousFragment = null)
-    : BasePage(page, context), IBaseFragment<TParent, SettingsPage<TParent>> where TParent : BasePage
+    : BasePage<TParent, SettingsPage<TParent>>(page, context, previousFragment)
+    where TParent : class, IBaseFragment<object, object>
 {
-    private readonly ILocator SaveButton = page.Locator("button:has-text('Save')");
-    private readonly ILocator DashboardLink = page.Locator("a:has-text('Dashboard')");
+    // Используем Page из BasePage, а не параметр page
+    private ILocator SaveButton => Page.Locator("button:has-text('Save')");
+    private ILocator DashboardLink => Page.Locator("a:has-text('Dashboard')");
 
-    public TParent? PreviousFragment { get; } = previousFragment;
+    public override SettingsPage<TParent> CurrentFragment => this;
 
-    /// <summary>
-    /// Клик по кнопке логина и переход на DashboardPage
-    /// </summary>
-    public Task<DashboardPage<SettingsPage<TParent>>> GoToDashboard()
+    public async Task<SettingsPage<TParent>> Open()
     {
-        return Task.FromResult(new DashboardPage<SettingsPage<TParent>>(Page, Context, this));
+        var pageLogin = await new LoginPage(Page, Context).Open();
+        // Здесь можно добавить логику для открытия страницы, если это необходимо
+        return this;
     }
-    
-    public Task<SettingsPage<TParent>> HelloSettings()
+
+    public async Task<SettingsPage<TParent>> Hello()
     {
         Console.WriteLine("Hello Settings");
-        return Task.FromResult(this);
+        return this;
     }
-    
+
 }

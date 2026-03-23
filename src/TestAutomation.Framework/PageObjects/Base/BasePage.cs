@@ -8,23 +8,20 @@ namespace TestAutomation.Framework.PageObjects.Base;
 /// Базовый класс для всех Page Objects.
 /// Использует только нативные возможности Playwright.
 /// </summary>
-public abstract class BasePage
+public abstract class BasePage<TParent, TCurrent>(IPage page, IBrowserContext context, TParent? previousFragment = null)
+    : IBaseFragment<TParent, TCurrent>
+    where TParent : class
+    where TCurrent : class
 {
     /// <summary>
     /// IPage - публичное свойство для реализации IBaseFragment
     /// </summary>
-    public IPage Page { get; }
-    
+    public IPage Page { get; } = page;
+
     /// <summary>
     /// IBrowserContext - остается protected или public по желанию
     /// </summary>
-    public IBrowserContext Context { get; }
-
-    protected BasePage(IPage page, IBrowserContext context)
-    {
-        Page = page;
-        Context = context;
-    }
+    protected IBrowserContext Context { get; } = context;
 
     /// <summary>
     /// Навигация с автоматическим ожиданием загрузки
@@ -44,17 +41,7 @@ public abstract class BasePage
     {
         return Page.Url.Contains(expectedUrl);
     }
-    
-    /// <summary>
-    /// Клик по кнопке логина и переход на DashboardPage
-    /// </summary>
-    public Task<LoginPage> GoToLoginPageAsync()
-    {
-        return Task.FromResult(new LoginPage(Page, Context));
-    }
 
-    public string ReturnHelloAsync()
-    {
-        return "ASDASDSAD";
-    }
+    public TParent? PreviousFragment => previousFragment;
+    public abstract TCurrent CurrentFragment { get; }
 }

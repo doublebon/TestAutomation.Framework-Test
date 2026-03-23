@@ -6,8 +6,8 @@ using static Microsoft.Playwright.Assertions;
 namespace TestAutomation.Framework.PageObjects.Pages;
 
 public class Html5FormPage<TParent>(IPage page, IBrowserContext context, TParent? previousFragment = null)
-    : BasePage(page, context), IBaseFragment<TParent, Html5FormPage<TParent>>
-    where TParent : BasePage
+    : BasePage<TParent, Html5FormPage<TParent>>(page, context)
+    where TParent : class, IBaseFragment<object, object>
 {
     public TParent? PreviousFragment { get; } = previousFragment;
     // ========== LOCATORS С .Describe() ==========
@@ -39,6 +39,8 @@ public class Html5FormPage<TParent>(IPage page, IBrowserContext context, TParent
 
     private ILocator ResetButtonLocator => Page.Locator("//input[@type='reset']")
         .Describe("Reset Button");
+
+    public override Html5FormPage<TParent> CurrentFragment => this;
 
     // ========== HELPER МЕТОДЫ ==========
 
@@ -115,4 +117,4 @@ public class Html5FormPage<TParent>(IPage page, IBrowserContext context, TParent
     }
 }
 
-public class Html5FormPage(IPage page, IBrowserContext context) : Html5FormPage<BasePage>(page, context);
+public class Html5FormPage(IPage page, IBrowserContext context) : Html5FormPage<BasePage<object, object>>(page, context);

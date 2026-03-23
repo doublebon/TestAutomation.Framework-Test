@@ -18,31 +18,20 @@ public class LoginTests : BaseTest
     [Category("Login")]
     public async Task MyTest_Login22222()
     {
-        var s = await new LoginPage(Page, Context)
-            .ClickLoginAsync()
-            .Then(page => page.GoToLoginPageAsync())
-            .Then(async page => {
+        var s = await new LoginPage(Page, Context).Open()
+            .Then(async page =>
+            {
                 await page.EnterPasswordAsync("1111");
                 await page.EnterUsernameAsync("111");
                 return page;
             })
-            .Then(page => page.ReturnHelloAsync());
+            .Then(page => page.GoToSettings())
+            .Then(page => page.Hello())
+            .Then(page => page.Hello())
+            .Then(page => page.UnFocus())
+            .Then(page => page.HelloLogin())
+            .Then(page => page.GoToSettings())
+            .Then(page => page.Hello());
         Console.WriteLine(s);
-    }
-
-    [Test]
-    [Category("Login")]
-    public async Task MyTest_Login2222233()
-    {
-        await new LoginPage(Page, Context)
-            .GoToSettings()
-                .Then(page => page.GoToDashboard())
-                .Then(page => page.HelloDashBoard())
-                .Then(page => page.UnFocus())
-                .Then(page => page.HelloSettings())
-                .Then(page => page.GoToLoginPageAsync())
-                .Then(page => page.HelloLogin())
-                .Then(page => page.GoToSettings())
-                .Then(page => page.HelloSettings());
     }
 }

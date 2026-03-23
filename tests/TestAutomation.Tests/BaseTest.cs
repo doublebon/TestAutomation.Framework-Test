@@ -11,7 +11,7 @@ namespace TestAutomation.Tests;
 [SetUpFixture]
 public class GlobalPlaywrightFixture
 {
-    public static IPlaywright Playwright { get; private set; } = null!;
+    private static IPlaywright Playwright { get; set; } = null!;
     public static IBrowser Browser { get; private set; } = null!;
 
     [OneTimeSetUp]
@@ -116,7 +116,6 @@ public abstract class BaseTest
 
 
         Page = await Context.NewPageAsync();
-        await Page.GotoAsync(TestConfiguration.BaseUrl);
     }
 
     [TearDown]
