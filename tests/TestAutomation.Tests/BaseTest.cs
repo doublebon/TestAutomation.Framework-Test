@@ -33,8 +33,8 @@ public class GlobalPlaywrightFixture
             Headless = TestConfiguration.Headless,
             SlowMo = TestConfiguration.SlowMo,
             Timeout = TestConfiguration.LaunchTimeout,
-            Args = new[]
-            {
+            Args =
+            [
                 "--disable-blink-features=AutomationControlled", // Скрыть automation флаг
     
                 // 💾 ПАМЯТЬ И РЕСУРСЫ
@@ -53,7 +53,7 @@ public class GlobalPlaywrightFixture
                 // 🛡️ СТАБИЛЬНОСТЬ
                 "--disable-breakpad",
                 "--enable-automation"
-            }
+            ]
         });
 
 
@@ -128,28 +128,35 @@ public abstract class BaseTest
         var outputDir = Directory.GetCurrentDirectory();
         var tracePath = Path.Combine(outputDir, "testResults/traces", $"{testName}.zip");
         var screenshotPath = Path.Combine(outputDir, "testResults/screenshots", $"{testName}.png");
-
-
-        // Сохраняем трейс ТОЛЬКО если тест упал
-        await Context.Tracing.StopAsync(new TracingStopOptions
+        
+        try
         {
-            Path = isFailed ? tracePath : null
-        });
-
-
-        if (isFailed)
-        {
-            await Page.ScreenshotAsync(new PageScreenshotOptions
+            // Сохраняем трейс ТОЛЬКО если тест упал
+            await Context.Tracing.StopAsync(new TracingStopOptions
             {
-                Path = screenshotPath,
-                FullPage = true
+                Path = isFailed ? tracePath : null
             });
 
-            TestContext.AddTestAttachment(screenshotPath, "Screenshot");
-            TestContext.AddTestAttachment(tracePath, "Playwright Trace");
-        }
+            if (isFailed)
+            {
+                await Page.ScreenshotAsync(new PageScreenshotOptions
+                {
+                    Path = screenshotPath,
+                    FullPage = true
+                });
 
-        await Page.CloseAsync();
-        await Context.CloseAsync();
+                TestContext.AddTestAttachment(screenshotPath, "Screenshot");
+                TestContext.AddTestAttachment(tracePath, "Playwright Trace");
+            }
+        }
+        catch (Exception ex)
+        {
+            TestContext.WriteLine($"Error saving artifacts: {ex.Message}");
+        }
+        finally
+        {
+            await Page.CloseAsync();
+            await Context.CloseAsync();
+        }
     }
 }
