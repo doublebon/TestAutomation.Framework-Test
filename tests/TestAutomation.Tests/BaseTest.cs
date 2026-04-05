@@ -33,8 +33,8 @@ public class GlobalPlaywrightFixture
             Headless = TestConfiguration.Headless,
             SlowMo = TestConfiguration.SlowMo,
             Timeout = TestConfiguration.LaunchTimeout,
-            Args = new[]
-            {
+            Args =
+            [
                 "--disable-blink-features=AutomationControlled", // Скрыть automation флаг
     
                 // 💾 ПАМЯТЬ И РЕСУРСЫ
@@ -53,7 +53,7 @@ public class GlobalPlaywrightFixture
                 // 🛡️ СТАБИЛЬНОСТЬ
                 "--disable-breakpad",
                 "--enable-automation"
-            }
+            ]
         });
 
 
@@ -128,7 +128,7 @@ public abstract class BaseTest
         var outputDir = Directory.GetCurrentDirectory();
         var tracePath = Path.Combine(outputDir, "testResults/traces", $"{testName}.zip");
         var screenshotPath = Path.Combine(outputDir, "testResults/screenshots", $"{testName}.png");
-
+      
         try
         {
             // Сохраняем трейс ТОЛЬКО если тест упал
