@@ -23,7 +23,7 @@ public class SettingsPage<TParent>(IPage page, IBrowserContext context, TParent?
         return this;
     }
 
-    public async Task<SettingsPage<TParent>> Hello()
+    public SettingsPage<TParent> Hello()
     {
         Console.WriteLine("Hello Settings");
         return this;
