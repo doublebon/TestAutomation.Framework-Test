@@ -9,7 +9,7 @@ public static class TestConfiguration
     static TestConfiguration()
     {
         Configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
+            .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false)
             //.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("TEST_ENV") ?? "Development"}.json", optional: true)
             .AddEnvironmentVariables()
