@@ -128,7 +128,7 @@ public abstract class BaseTest
         var outputDir = Directory.GetCurrentDirectory();
         var tracePath = Path.Combine(outputDir, "testResults/traces", $"{testName}.zip");
         var screenshotPath = Path.Combine(outputDir, "testResults/screenshots", $"{testName}.png");
-        
+      
         try
         {
             // Сохраняем трейс ТОЛЬКО если тест упал
