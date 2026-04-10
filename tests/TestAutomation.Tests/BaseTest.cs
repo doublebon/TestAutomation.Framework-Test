@@ -66,8 +66,14 @@ public class GlobalPlaywrightFixture
     [OneTimeTearDown]
     public async Task GlobalTeardown()
     {
-        await Browser.CloseAsync();
-        Playwright.Dispose();
+        try
+        {
+            await Browser.CloseAsync();
+        }
+        finally
+        {
+            Playwright.Dispose();
+        }
     }
 }
 
@@ -104,15 +110,20 @@ public abstract class BaseTest
             {
                 Width = TestConfiguration.ViewportWidth,
                 Height = TestConfiguration.ViewportHeight
-            }
+            },
+            Locale = "ru-RU",
+            TimezoneId = "Europe/Moscow"
         });
 
-        await Context.Tracing.StartAsync(new TracingStartOptions
+        if (TestConfiguration.EnableTracing)
         {
-            Screenshots = true,
-            Snapshots = true,
-            Sources = true
-        });
+            await Context.Tracing.StartAsync(new TracingStartOptions
+            {
+                Screenshots = true,
+                Snapshots = true,
+                Sources = false
+            });
+        }
 
 
         Page = await Context.NewPageAsync();
@@ -121,24 +132,26 @@ public abstract class BaseTest
     [TearDown]
     public async Task TearDown()
     {
-        var testName = TestContext.CurrentContext.Test.Name;
-        var isFailed = TestContext.CurrentContext.Result.Outcome.Status ==
-                        NUnit.Framework.Interfaces.TestStatus.Failed;
-
-        var outputDir = Directory.GetCurrentDirectory();
-        var tracePath = Path.Combine(outputDir, "testResults/traces", $"{testName}.zip");
-        var screenshotPath = Path.Combine(outputDir, "testResults/screenshots", $"{testName}.png");
-      
         try
         {
-            // Сохраняем трейс ТОЛЬКО если тест упал
-            await Context.Tracing.StopAsync(new TracingStopOptions
-            {
-                Path = isFailed ? tracePath : null
-            });
+            var isFailed = TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed;
 
-            if (isFailed)
+            if (TestConfiguration.EnableTracing && Context != null)
             {
+                string? tracePath = isFailed
+                    ? Path.Combine(Directory.GetCurrentDirectory(), "testResults/traces", $"{TestContext.CurrentContext.Test.Name}.zip")
+                    : null;
+
+                await Context.Tracing.StopAsync(new TracingStopOptions { Path = tracePath });
+
+                if (tracePath != null)
+                    TestContext.AddTestAttachment(tracePath, "Playwright Trace");
+            }
+
+            if (isFailed && Page != null)
+            {
+                var screenshotPath = Path.Combine(Directory.GetCurrentDirectory(), "testResults/screenshots", $"{TestContext.CurrentContext.Test.Name}.png");
+
                 await Page.ScreenshotAsync(new PageScreenshotOptions
                 {
                     Path = screenshotPath,
@@ -146,17 +159,14 @@ public abstract class BaseTest
                 });
 
                 TestContext.AddTestAttachment(screenshotPath, "Screenshot");
-                TestContext.AddTestAttachment(tracePath, "Playwright Trace");
             }
-        }
-        catch (Exception ex)
-        {
-            TestContext.WriteLine($"Error saving artifacts: {ex.Message}");
         }
         finally
         {
-            await Page.CloseAsync();
-            await Context.CloseAsync();
+            if (Page != null)
+                await Page.CloseAsync();
+            if (Context != null)
+                await Context.CloseAsync();
         }
     }
 }

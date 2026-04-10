@@ -42,4 +42,11 @@ public class LoginTests : BaseTest
         await new SettingsPage(Page, Context).Open()
             .Then(page => page.Hello());
     }
+
+    [Test]
+    [Category("Login")]
+    public async Task MyTest_1111()
+    {
+        Console.WriteLine("Hello 1111");
+    }
 }
