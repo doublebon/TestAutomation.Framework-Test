@@ -33,8 +33,8 @@ public class GlobalPlaywrightFixture
             Headless = TestConfiguration.Headless,
             SlowMo = TestConfiguration.SlowMo,
             Timeout = TestConfiguration.LaunchTimeout,
-            Args = new[]
-            {
+            Args =
+            [
                 "--disable-blink-features=AutomationControlled", // Скрыть automation флаг
     
                 // 💾 ПАМЯТЬ И РЕСУРСЫ
@@ -53,7 +53,7 @@ public class GlobalPlaywrightFixture
                 // 🛡️ СТАБИЛЬНОСТЬ
                 "--disable-breakpad",
                 "--enable-automation"
-            }
+            ]
         });
 
 
@@ -66,8 +66,14 @@ public class GlobalPlaywrightFixture
     [OneTimeTearDown]
     public async Task GlobalTeardown()
     {
-        await Browser.CloseAsync();
-        Playwright.Dispose();
+        try
+        {
+            await Browser.CloseAsync();
+        }
+        finally
+        {
+            Playwright.Dispose();
+        }
     }
 }
 
@@ -104,15 +110,20 @@ public abstract class BaseTest
             {
                 Width = TestConfiguration.ViewportWidth,
                 Height = TestConfiguration.ViewportHeight
-            }
+            },
+            Locale = "ru-RU",
+            TimezoneId = "Europe/Moscow"
         });
 
-        await Context.Tracing.StartAsync(new TracingStartOptions
+        if (TestConfiguration.EnableTracing)
         {
-            Screenshots = true,
-            Snapshots = true,
-            Sources = true
-        });
+            await Context.Tracing.StartAsync(new TracingStartOptions
+            {
+                Screenshots = true,
+                Snapshots = true,
+                Sources = false
+            });
+        }
 
 
         Page = await Context.NewPageAsync();
@@ -122,35 +133,41 @@ public abstract class BaseTest
     [TearDown]
     public async Task TearDown()
     {
-        var testName = TestContext.CurrentContext.Test.Name;
-        var isFailed = TestContext.CurrentContext.Result.Outcome.Status ==
-                        NUnit.Framework.Interfaces.TestStatus.Failed;
-
-        var outputDir = Directory.GetCurrentDirectory();
-        var tracePath = Path.Combine(outputDir, "testResults/traces", $"{testName}.zip");
-        var screenshotPath = Path.Combine(outputDir, "testResults/screenshots", $"{testName}.png");
-
-
-        // Сохраняем трейс ТОЛЬКО если тест упал
-        await Context.Tracing.StopAsync(new TracingStopOptions
+        try
         {
-            Path = isFailed ? tracePath : null
-        });
+            var isFailed = TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed;
 
-
-        if (isFailed)
-        {
-            await Page.ScreenshotAsync(new PageScreenshotOptions
+            if (TestConfiguration.EnableTracing && Context != null)
             {
-                Path = screenshotPath,
-                FullPage = true
-            });
+                string? tracePath = isFailed
+                    ? Path.Combine(Directory.GetCurrentDirectory(), "testResults/traces", $"{TestContext.CurrentContext.Test.Name}.zip")
+                    : null;
 
-            TestContext.AddTestAttachment(screenshotPath, "Screenshot");
-            TestContext.AddTestAttachment(tracePath, "Playwright Trace");
+                await Context.Tracing.StopAsync(new TracingStopOptions { Path = tracePath });
+
+                if (tracePath != null)
+                    TestContext.AddTestAttachment(tracePath, "Playwright Trace");
+            }
+
+            if (isFailed && Page != null)
+            {
+                var screenshotPath = Path.Combine(Directory.GetCurrentDirectory(), "testResults/screenshots", $"{TestContext.CurrentContext.Test.Name}.png");
+
+                await Page.ScreenshotAsync(new PageScreenshotOptions
+                {
+                    Path = screenshotPath,
+                    FullPage = true
+                });
+
+                TestContext.AddTestAttachment(screenshotPath, "Screenshot");
+            }
         }
-
-        await Page.CloseAsync();
-        await Context.CloseAsync();
+        finally
+        {
+            if (Page != null)
+                await Page.CloseAsync();
+            if (Context != null)
+                await Context.CloseAsync();
+        }
     }
 }

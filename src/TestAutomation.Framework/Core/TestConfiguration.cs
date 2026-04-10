@@ -35,4 +35,5 @@ public static class TestConfiguration
 
     // Recording
     public static bool RecordVideo => bool.Parse(Configuration["TestSettings:RecordVideo"] ?? "false");
+    public static bool EnableTracing => bool.Parse(Configuration["TestSettings:EnableTracing"] ?? "true");
 }

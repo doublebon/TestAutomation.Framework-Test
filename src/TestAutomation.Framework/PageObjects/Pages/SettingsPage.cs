@@ -9,7 +9,7 @@ namespace TestAutomation.Framework.PageObjects.Pages;
 public class SettingsPage<TParent>(IPage page, IBrowserContext context, TParent? previousFragment = null)
     : BasePage(page, context), IBaseFragment<TParent, SettingsPage<TParent>> where TParent : BasePage
 {
-    private readonly ILocator SaveButton = page.Locator("button:has-text('Save')");
+    private readonly ILocator SaveButton = page.Locator("button:has-text('Save')").Describe("Save Button");
     private readonly ILocator DashboardLink = page.Locator("a:has-text('Dashboard')");
 
     public TParent? PreviousFragment { get; } = previousFragment;

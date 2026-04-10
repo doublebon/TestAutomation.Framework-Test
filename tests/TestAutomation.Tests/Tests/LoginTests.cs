@@ -45,4 +45,11 @@ public class LoginTests : BaseTest
                 .Then(page => page.GoToSettings())
                 .Then(page => page.HelloSettings());
     }
+
+    [Test]
+    [Category("Login")]
+    public async Task MyTest_1111()
+    {
+        Console.WriteLine("Hello 1111");
+    }
 }
